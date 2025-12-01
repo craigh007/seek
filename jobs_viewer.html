@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seek Jobs Viewer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .results-header {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .results-count {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .jobs-container {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .job-card {
+            padding: 25px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
+        .job-card:hover {
+            background-color: #f8f9ff;
+        }
+
+        .job-card:last-child {
+            border-bottom: none;
+        }
+
+        .job-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .job-title a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .job-title a:hover {
+            color: #764ba2;
+        }
+
+        .job-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+        }
+
+        .meta-icon {
+            font-weight: bold;
+        }
+
+        .job-description {
+            color: #555;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            background: #e8ecff;
+            color: #667eea;
+        }
+
+        .triage-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .triage-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .triage-yes {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .triage-yes:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .triage-gsv {
+            background: #FF9800;
+            color: white;
+        }
+
+        .triage-gsv:hover {
+            background: #F57C00;
+            transform: translateY(-2px);
+        }
+
+        .triage-no {
+            background: #f44336;
+            color: white;
+        }
+
+        .triage-no:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .triage-btn:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+        }
+
+        .page-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .job-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Seek Jobs Viewer</h1>
+            <p>Browse and search job listings from your database</p>
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalJobs">-</div>
+                    <div class="stat-label">Total Jobs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="newToday">-</div>
+                    <div class="stat-label">New Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="newWeek">-</div>
+                    <div class="stat-label">New This Week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="uniqueCompanies">-</div>
+                    <div class="stat-label">Companies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="uniqueLocations">-</div>
+                    <div class="stat-label">Locations</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="filters">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="triageFilter">Triage Status</label>
+                    <select id="triageFilter">
+                        <option value="untagged" selected>Untagged Only</option>
+                        <option value="yes">Yes - Interested</option>
+                        <option value="gsv">GSV - Get Staffed Virtual</option>
+                        <option value="no">No - Not Interested</option>
+                        <option value="all">Show All</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="searchInput">Keyword Search</label>
+                    <input type="text" id="searchInput" placeholder="Search title, company, or description...">
+                </div>
+                <div class="filter-group">
+                    <label for="locationFilter">Location</label>
+                    <select id="locationFilter">
+                        <option value="">All Locations</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="companyFilter">Company</label>
+                    <select id="companyFilter">
+                        <option value="">All Companies</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="jobTypeFilter">Job Type</label>
+                    <select id="jobTypeFilter">
+                        <option value="">All Types</option>
+                        <option value="Full time">Full time</option>
+                        <option value="Part time">Part time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Temporary">Temporary</option>
+                    </select>
+                </div>
+            </div>
+            <button class="search-btn" onclick="searchJobs()">Search Jobs</button>
+        </div>
+
+        <div class="results-header">
+            <div class="results-count" id="resultsCount">Loading...</div>
+            <div>
+                <select id="limitSelect" onchange="searchJobs()">
+                    <option value="25">25 per page</option>
+                    <option value="50" selected>50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="jobs-container" id="jobsContainer">
+            <div class="loading">Loading jobs...</div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+    <script>
+        // Automatically detect the correct host (works on both localhost and iPhone)
+        const API_BASE = `${window.location.protocol}//${window.location.hostname}:5500/api`;
+        let currentPage = 0;
+        let currentTotal = 0;
+        let currentLimit = 50;
+
+        // Load initial data
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadLocations();
+            loadCompanies();
+            searchJobs();
+
+            // Add enter key listener for search
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchJobs();
+            });
+        });
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const stats = await response.json();
+
+                document.getElementById('totalJobs').textContent = stats.total_jobs.toLocaleString();
+                document.getElementById('newToday').textContent = stats.new_today.toLocaleString();
+                document.getElementById('newWeek').textContent = stats.new_this_week.toLocaleString();
+                document.getElementById('uniqueCompanies').textContent = stats.unique_companies.toLocaleString();
+                document.getElementById('uniqueLocations').textContent = stats.unique_locations.toLocaleString();
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadLocations() {
+            try {
+                const response = await fetch(`${API_BASE}/locations`);
+                const locations = await response.json();
+                const select = document.getElementById('locationFilter');
+
+                locations.forEach(location => {
+                    const option = document.createElement('option');
+                    option.value = location;
+                    option.textContent = location;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading locations:', error);
+            }
+        }
+
+        async function loadCompanies() {
+            try {
+                const response = await fetch(`${API_BASE}/companies`);
+                const companies = await response.json();
+                const select = document.getElementById('companyFilter');
+
+                companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company;
+                    option.textContent = company;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading companies:', error);
+            }
+        }
+
+        async function searchJobs(page = 0) {
+            currentPage = page;
+            currentLimit = parseInt(document.getElementById('limitSelect').value);
+
+            const search = document.getElementById('searchInput').value;
+            const location = document.getElementById('locationFilter').value;
+            const company = document.getElementById('companyFilter').value;
+            const jobType = document.getElementById('jobTypeFilter').value;
+            const triage = document.getElementById('triageFilter').value;
+
+            const params = new URLSearchParams({
+                search,
+                location,
+                company,
+                job_type: jobType,
+                triage: triage,
+                limit: currentLimit,
+                offset: page * currentLimit
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/jobs?${params}`);
+                const data = await response.json();
+
+                currentTotal = data.total;
+                displayJobs(data.jobs);
+                displayPagination(data.total, data.limit, data.offset);
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('jobsContainer').innerHTML =
+                    '<div class="no-results">Error loading jobs. Please make sure the server is running.</div>';
+            }
+        }
+
+        function displayJobs(jobs) {
+            const container = document.getElementById('jobsContainer');
+            const resultsCount = document.getElementById('resultsCount');
+
+            resultsCount.textContent = `${currentTotal.toLocaleString()} jobs found`;
+
+            if (jobs.length === 0) {
+                container.innerHTML = '<div class="no-results">No jobs found matching your criteria.</div>';
+                return;
+            }
+
+            container.innerHTML = jobs.map(job => `
+                <div class="job-card" id="job-${job.id}">
+                    <div class="job-title">
+                        <a href="${job.url}" target="_blank">${escapeHtml(job.title)}</a>
+                    </div>
+                    <div class="job-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">🏢</span>
+                            <span>${escapeHtml(job.company || 'N/A')}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📍</span>
+                            <span>${escapeHtml(job.location || 'N/A')}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">💰</span>
+                            <span>${escapeHtml(job.salary || 'Not specified')}</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span>${escapeHtml(job.date_listed || 'N/A')}</span>
+                        </div>
+                        ${job.job_type ? `<span class="badge">${escapeHtml(job.job_type)}</span>` : ''}
+                    </div>
+                    <div class="job-description">
+                        ${escapeHtml(job.description || 'No description available')}
+                    </div>
+                    <div class="meta-item" style="margin-top: 10px; font-size: 0.85em; color: #999;">
+                        <span>First seen: ${formatDate(job.first_seen)}</span>
+                    </div>
+                    ${!job.triage_status ? `
+                    <div class="triage-buttons">
+                        <button class="triage-btn triage-yes" onclick="triageJob(${job.id}, 'yes')">
+                            ✓ Yes
+                        </button>
+                        <button class="triage-btn triage-gsv" onclick="triageJob(${job.id}, 'gsv')">
+                            GSV
+                        </button>
+                        <button class="triage-btn triage-no" onclick="triageJob(${job.id}, 'no')">
+                            ✗ No
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function displayPagination(total, limit, offset) {
+            const totalPages = Math.ceil(total / limit);
+            const currentPage = Math.floor(offset / limit);
+            const pagination = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+
+            pagination.style.display = 'flex';
+
+            let html = '';
+
+            // Previous button
+            html += `<button class="page-btn" onclick="searchJobs(${currentPage - 1})" ${currentPage === 0 ? 'disabled' : ''}>Previous</button>`;
+
+            // Page numbers (show max 7 pages)
+            let startPage = Math.max(0, currentPage - 3);
+            let endPage = Math.min(totalPages - 1, startPage + 6);
+
+            if (endPage - startPage < 6) {
+                startPage = Math.max(0, endPage - 6);
+            }
+
+            if (startPage > 0) {
+                html += `<button class="page-btn" onclick="searchJobs(0)">1</button>`;
+                if (startPage > 1) html += '<span style="padding: 10px;">...</span>';
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="searchJobs(${i})">${i + 1}</button>`;
+            }
+
+            if (endPage < totalPages - 1) {
+                if (endPage < totalPages - 2) html += '<span style="padding: 10px;">...</span>';
+                html += `<button class="page-btn" onclick="searchJobs(${totalPages - 1})">${totalPages}</button>`;
+            }
+
+            // Next button
+            html += `<button class="page-btn" onclick="searchJobs(${currentPage + 1})" ${currentPage >= totalPages - 1 ? 'disabled' : ''}>Next</button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        async function triageJob(jobId, status) {
+            try {
+                const response = await fetch(`${API_BASE}/triage/${jobId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: status })
+                });
+
+                if (response.ok) {
+                    // Remove the job card with animation
+                    const jobCard = document.getElementById(`job-${jobId}`);
+                    if (jobCard) {
+                        jobCard.style.transition = 'opacity 0.3s, transform 0.3s';
+                        jobCard.style.opacity = '0';
+                        jobCard.style.transform = 'translateX(-20px)';
+
+                        setTimeout(() => {
+                            jobCard.remove();
+
+                            // Update results count
+                            currentTotal--;
+                            document.getElementById('resultsCount').textContent =
+                                `${currentTotal.toLocaleString()} jobs found`;
+
+                            // If no more jobs on this page, reload
+                            const jobsContainer = document.getElementById('jobsContainer');
+                            if (jobsContainer.children.length === 0) {
+                                searchJobs(currentPage);
+                            }
+                        }, 300);
+                    }
+                } else {
+                    alert('Error updating job status');
+                }
+            } catch (error) {
+                console.error('Error triaging job:', error);
+                alert('Error updating job status');
+            }
+        }
+    </script>
+</body>
+</html>

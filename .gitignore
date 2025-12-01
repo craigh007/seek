@@ -1,0 +1,8 @@
+.env
+*.db
+*.pyc
+__pycache__/
+.backup/
+*.csv
+*.json
+nul
