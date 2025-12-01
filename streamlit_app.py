@@ -60,7 +60,15 @@ st.markdown("""
 def rank_jobs_with_gpt(jobs: list, cv_text: str) -> list:
     """Use GPT to rank jobs by CV match. Returns jobs with ai_score and ai_reason."""
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    # Try Streamlit secrets first, fall back to env var
+    try:
+        api_key = st.secrets.get("OPENAI_API_KEY")
+    except:
+        api_key = None
+
+    if not api_key:
+        api_key = os.getenv("OPENAI_API_KEY")
+
     if not api_key:
         st.error("OPENAI_API_KEY not set")
         return jobs

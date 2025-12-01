@@ -4,20 +4,29 @@ Supabase database client for Seek jobs
 
 import os
 from supabase import create_client, Client
-from dotenv import load_dotenv
 
-load_dotenv()
+# Try Streamlit secrets first (for cloud), fall back to env vars (for local)
+try:
+    import streamlit as st
+    SUPABASE_URL = st.secrets.get("SUPABASE_URL")
+    SUPABASE_KEY = st.secrets.get("SUPABASE_KEY")
+except:
+    SUPABASE_URL = None
+    SUPABASE_KEY = None
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    from dotenv import load_dotenv
+    load_dotenv()
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 
 def get_client() -> Client:
     """Get Supabase client instance"""
-    url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY")
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in secrets or .env")
 
-    if not url or not key:
-        raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env")
-
-    return create_client(url, key)
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def get_jobs(
